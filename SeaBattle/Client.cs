@@ -83,8 +83,10 @@ public class Client
         byte[] buffer = new byte[1024];
         int bytesRead = stream.Read(buffer, 0, buffer.Length);
         string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+        PrintColored($"msg: {message}", ConsoleColor.Blue);
         string note = message.Split("!")[1];
         message = message.Split("!")[0];
+        
         switch (note)
         {
             case "error":

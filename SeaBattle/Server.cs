@@ -15,7 +15,7 @@ public class Server
     public Server(int port)
     {
         _server = new TcpListener(IPAddress.Any, port);
-        Console.WriteLine(Dns.GetHostName() + ":" + port);
+        ServerWrite(Dns.GetHostAddresses(Dns.GetHostName())[1] + ":" + port);
     }
 
     public void Start()
