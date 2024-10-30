@@ -10,12 +10,16 @@ public class Server
 {
     private readonly TcpListener _server;
     private readonly List<TcpClient> _clientsList = new List<TcpClient>();
+    private readonly int _port;
     private bool _active = false;
     
     public Server(int port)
     {
-        _server = new TcpListener(IPAddress.Any, port);
-        ServerWrite(Dns.GetHostAddresses(Dns.GetHostName())[1] + ":" + port);
+        _port = port;
+        _server = new TcpListener(IPAddress.Any, _port);
+        
+        ServerWrite(findIPv4() + ":" + port);
+
     }
 
     public void Start()
@@ -30,7 +34,7 @@ public class Server
         {
             TcpClient client = _server.AcceptTcpClient();
             
-            if (_clientsList.Count < 2)
+            if (_clientsList.Count < 5)
             {
                 ServerWrite("Client connected.");
                 _clientsList.Add(client);
@@ -65,13 +69,20 @@ public class Server
                 bytesRead = stream.Read(buffer, 0, buffer.Length);
                 string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 ServerWrite($"Получено сообщение: {message}");
-                if (message == "/q")
+                if (message == "/ip")
+                {
+                    foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+                    {
+                        ServerWrite(ip + ":" + _port);
+                    }
+                } else if (message == "/q")
                 {
                     client.Close();
                     _clientsList.Remove(client); 
                     ServerWrite($"Count of clients: {_clientsList.Count}.");
                     break;
                 }
+
                 string response = "Сообщение получено";
                 byte[] responseData = Encoding.UTF8.GetBytes(response);
                 stream.Write(responseData, 0, responseData.Length);
@@ -97,7 +108,23 @@ public class Server
         _active = false;
         _server.Stop();
     }
-    
+
+    private string findIPv4()
+    {
+        string ipv4 = "";
+        foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+        {
+            var ipArr = ip.ToString().Split('.');
+            if (ipArr.Length == 4)
+            {
+                if (ipArr[0] == "192" || ipArr[0] == "172" || ipArr[0] == "10")
+                {
+                    ipv4 = ip.ToString();
+                }
+            }
+        }
+        return ipv4;
+    }
     
     private void ServerResponce(TcpClient client, string errorMessage, string note)
     {

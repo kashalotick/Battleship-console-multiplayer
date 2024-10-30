@@ -1,4 +1,5 @@
 ﻿using Console = System.Console;
+using System.Net;
 
 namespace SeaBattle;
 
@@ -72,19 +73,28 @@ class Program
             }
         }
 
-// 123.456.78.90
-// 123.456.78.90:5002
+
         if (mode == 1)
         {
+            string ipAddress;
+            string port;
+            string name;
+            
             Console.Clear();
             Console.WriteLine("Enter the adress for connection - ip:port");
             string address = Console.ReadLine();
+            
+            
             if (address[address.Length - 4] != ':')
                 address += ":5000";
             
-            string ipAddress = address.Split(":")[0];
-            string port = address.Split(":")[1];
-            string name;
+            ipAddress = address.Split(":")[0];
+            port = address.Split(":")[1];
+            
+            if (ipAddress == "auto")
+            {
+                ipAddress = findIPv4();
+            }
 
             Console.WriteLine("Enter your name");
             do
@@ -117,11 +127,11 @@ class Program
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 {
                     portStr = "5000";
-                    Console.WriteLine("Windows");
+                    //Console.WriteLine("Windows");
                 } else if (Environment.OSVersion.Platform == PlatformID.Unix)
                 {
                     portStr = "5001";
-                    Console.WriteLine("Mac");
+                    //Console.WriteLine("Mac");
                 }
                 else
                 {
@@ -167,7 +177,7 @@ class Program
         
         
         
-        void PrintColored(string text, ConsoleColor color)
+        static void PrintColored(string text, ConsoleColor color)
         {
             Console.ForegroundColor = color;
             Console.WriteLine(text);
@@ -175,13 +185,22 @@ class Program
         }
        
 
-        
-        
-        
-        
-        
-        
-        
+        static string findIPv4()
+        {
+            string ipv4 = "";
+            foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+            {
+                var ipArr = ip.ToString().Split('.');
+                if (ipArr.Length == 4)
+                {
+                    if (ipArr[0] == "192" || ipArr[0] == "172" || ipArr[0] == "10")
+                    {
+                        ipv4 = ip.ToString();
+                    }
+                }
+            }
+            return ipv4;
+        }
     }
 }
 //localhost:5001

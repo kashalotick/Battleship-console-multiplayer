@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 namespace SeaBattle;
@@ -14,8 +15,10 @@ public class Client
     
     public Client(string ipAddress, string port, string name)
     {
-        _ipAddress = ipAddress;
         _port = int.Parse(port);
+        _ipAddress = ipAddress;
+        PrintColored(_ipAddress, ConsoleColor.Yellow);
+        PrintColored(_port.ToString(), ConsoleColor.Yellow);
         _name = name;
         try
         {
@@ -83,7 +86,6 @@ public class Client
         byte[] buffer = new byte[1024];
         int bytesRead = stream.Read(buffer, 0, buffer.Length);
         string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        PrintColored($"msg: {message}", ConsoleColor.Blue);
         string note = message.Split("!")[1];
         message = message.Split("!")[0];
         
@@ -95,12 +97,9 @@ public class Client
             case "warning":
                 PrintColored(message, ConsoleColor.Yellow);
                 break;
-            case "success":
+            default:
                 PrintColored(message, ConsoleColor.Green);
                 break;
-            default:
-                PrintColored($"Unknown note: {message}", ConsoleColor.Blue);
-                break; 
         }
         return true;
     }
