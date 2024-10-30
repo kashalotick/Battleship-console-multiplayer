@@ -76,98 +76,107 @@ class Program
 
         if (mode == 1)
         {
-            string ipAddress;
-            string port;
-            string name;
+            string ipAddress = "localhost";
+            string port = "5000";
+            string name = "Client";
             
-            Console.Clear();
-            Console.WriteLine("Enter the adress for connection - ip:port");
-            string address = Console.ReadLine();
-            
-            
-            if (address[address.Length - 4] != ':')
-                address += ":5000";
-            
-            ipAddress = address.Split(":")[0];
-            port = address.Split(":")[1];
-            
-            if (ipAddress == "auto")
-            {
-                ipAddress = findIPv4();
-            }
-
-            Console.WriteLine("Enter your name");
-            do
-            {
-                Console.SetCursorPosition(0, 3);
-                name = Console.ReadLine();
-            } while (name.Length < 1);
+            // string ipAddress;
+            // string port;
+            // string name;
+            //
+            // Console.Clear();
+            // Console.WriteLine("Enter the adress for connection - ip:port");
+            // string address = Console.ReadLine();
+            //
+            //
+            // if (address[address.Length - 4] != ':')
+            //     address += ":5000";
+            //
+            // ipAddress = address.Split(":")[0];
+            // port = address.Split(":")[1];
+            //
+            // if (ipAddress == "auto")
+            // {
+            //     ipAddress = findIPv4();
+            // }
+            //
+            // Console.WriteLine("Enter your name");
+            // do
+            // {
+            //     Console.SetCursorPosition(0, 3);
+            //     name = Console.ReadLine();
+            // } while (name.Length < 1);
             
             Client client = new Client(ipAddress, port, name);
             client.Connect();
         }
         else
-        {
-            string portStr;
-            int port;
+        {  
+            string portStr = "5000";
+            int port = 5000;
             string ipAddress = "localhost";
-            string name;
+            string name = "HOST";
             
-            
-            Console.Clear();
-            Console.WriteLine("Enter the port (default: Windows: 5000, Mac: 5001)");
-            
-            readPort:
-            Console.SetCursorPosition(0, 1);
-            Console.WriteLine("       ");
-            Console.SetCursorPosition(0, 1);
-            portStr = Console.ReadLine();
-            if (portStr == "")
-            {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                {
-                    portStr = "5000";
-                    //Console.WriteLine("Windows");
-                } else if (Environment.OSVersion.Platform == PlatformID.Unix)
-                {
-                    portStr = "5001";
-                    //Console.WriteLine("Mac");
-                }
-                else
-                {
-                    PrintColored("Unknown OS, write it yourself", ConsoleColor.Red);
-                    goto readPort;
-                }
-                Console.SetCursorPosition(0, 1);
-                Console.WriteLine(portStr);
-            } else if (portStr.Length != 4)
-            {
-                PrintColored("Invalid port.", ConsoleColor.Red);
-                goto readPort;
-            }
-            
-            try
-            {
-                port = int.Parse(portStr);
-            }
-            catch (FormatException)
-            {
-                PrintColored("Invalid port.", ConsoleColor.Red);
-                goto readPort;
-            }
-            
-            Console.WriteLine("Enter your name");
-            do
-            {
-                Console.SetCursorPosition(0, 3);
-                name = Console.ReadLine();
-            } while (name.Length < 1);
+            // string portStr;
+            // int port;
+            // string ipAddress = "localhost";
+            // string name;
+            //
+            //
+            // Console.Clear();
+            // Console.WriteLine("Enter the port (default: Windows: 5000, Mac: 5001)");
+            //
+            // readPort:
+            // Console.SetCursorPosition(0, 1);
+            // Console.WriteLine("       ");
+            // Console.SetCursorPosition(0, 1);
+            // portStr = Console.ReadLine();
+            // if (portStr == "")
+            // {
+            //     if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            //     {
+            //         portStr = "5000";
+            //         //Console.WriteLine("Windows");
+            //     } else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            //     {
+            //         portStr = "5001";
+            //         //Console.WriteLine("Mac");
+            //     }
+            //     else
+            //     {
+            //         PrintColored("Unknown OS, write it yourself", ConsoleColor.Red);
+            //         goto readPort;
+            //     }
+            //     Console.SetCursorPosition(0, 1);
+            //     Console.WriteLine(portStr);
+            // } else if (portStr.Length != 4)
+            // {
+            //     PrintColored("Invalid port.", ConsoleColor.Red);
+            //     goto readPort;
+            // }
+            //
+            // try
+            // {
+            //     port = int.Parse(portStr);
+            // }
+            // catch (FormatException)
+            // {
+            //     PrintColored("Invalid port.", ConsoleColor.Red);
+            //     goto readPort;
+            // }
+            //
+            // Console.WriteLine("Enter your name");
+            // do
+            // {
+            //     Console.SetCursorPosition(0, 3);
+            //     name = Console.ReadLine();
+            // } while (name.Length < 1);
             
             Server server = new Server(port);
             Thread serverThread = new Thread(new ThreadStart(server.Start));
             serverThread.Start();
             
-            Thread.Sleep(1000);
+            Thread.Sleep(250);
             
             Client client = new Client(ipAddress, portStr, name);
             client.Connect();
@@ -185,22 +194,22 @@ class Program
         }
        
 
-        static string findIPv4()
-        {
-            string ipv4 = "";
-            foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
-            {
-                var ipArr = ip.ToString().Split('.');
-                if (ipArr.Length == 4)
-                {
-                    if (ipArr[0] == "192" || ipArr[0] == "172" || ipArr[0] == "10")
-                    {
-                        ipv4 = ip.ToString();
-                    }
-                }
-            }
-            return ipv4;
-        }
+        // static string findIPv4()
+        // {
+        //     string ipv4 = "";
+        //     foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+        //     {
+        //         var ipArr = ip.ToString().Split('.');
+        //         if (ipArr.Length == 4)
+        //         {
+        //             if (ipArr[0] == "192" || ipArr[0] == "172" || ipArr[0] == "10")
+        //             {
+        //                 ipv4 = ip.ToString();
+        //             }
+        //         }
+        //     }
+        //     return ipv4;
+        // }
     }
 }
 //localhost:5001

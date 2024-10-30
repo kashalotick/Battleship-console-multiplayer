@@ -8,6 +8,7 @@ namespace SeaBattle;
 
 public class Server
 {
+    private readonly string _version = "1.0";
     private readonly TcpListener _server;
     private readonly List<TcpClient> _clientsList = new List<TcpClient>();
     private readonly int _port;
@@ -33,25 +34,52 @@ public class Server
         while (_active)
         {
             TcpClient client = _server.AcceptTcpClient();
+            string forVerifying;
             
-            if (_clientsList.Count < 5)
+            try
             {
-                ServerWrite("Client connected.");
-                _clientsList.Add(client);
-                ServerWrite($"Count of clients: {_clientsList.Count}.");
-                ServerResponce(client, "Successful connection", "success");
-
-                
-                Thread clientThread = new Thread(HandleClient);
-                clientThread.Start(client);
+                NetworkStream stream = client.GetStream();
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                forVerifying = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+            }
+            catch (Exception e)
+            {
+                ServerWrite(e.Message);
+                continue;
+            }
+            //stream.Close();
+            if (forVerifying.Split(":")[1] != _version)
+            {
+                ServerWrite("Connection rejectted");
+                ServerResponce(client, "Connection rejected - different versions.", "error");
+                client.Close();
             }
             else
             {
-                ServerWrite("Connection rejectted");
-                ServerResponce(client, "Connection rejected - server if full.", "error");
-                client.Close();
-            }
+                ServerWrite("Verified");
+                if (_clientsList.Count < 2)
+                {
 
+                
+                    ServerWrite("Client connected.");
+                    _clientsList.Add(client);
+                
+                    ServerWrite($"Count of clients: {_clientsList.Count}.");
+                    ServerResponce(client, "Successful connection", "success");
+                
+                
+                    Thread clientThread = new Thread(HandleClient);
+                    clientThread.Start(client);
+                }
+                else
+                {
+                    ServerWrite("Connection rejectted");
+                    ServerResponce(client, "Connection rejected - server if full.", "error");
+                    client.Close();
+                }
+
+            }
         }
     }
     
@@ -60,46 +88,74 @@ public class Server
         TcpClient client = (TcpClient)obj;
         NetworkStream stream = client.GetStream();
 
-        byte[] buffer = new byte[1024];
+        
         int bytesRead;
-        while (_active)
+
+        try
         {
-            try
+            while (client.Connected)
             {
+                byte[] buffer = new byte[1024];
                 bytesRead = stream.Read(buffer, 0, buffer.Length);
-                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                ServerWrite($"Получено сообщение: {message}");
-                if (message == "/ip")
+                if (bytesRead == 0)
                 {
-                    foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
-                    {
-                        ServerWrite(ip + ":" + _port);
-                    }
-                } else if (message == "/q")
-                {
-                    client.Close();
-                    _clientsList.Remove(client); 
-                    ServerWrite($"Count of clients: {_clientsList.Count}.");
                     break;
                 }
+                
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                ServerWrite($"Получено сообщение: {message}");
+                
+                if (message[0] == '/')
+                {
+                    if (message == "/ip")
+                    {
+                        foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+                        {
+                            ServerWrite(ip + ":" + _port);
+                        }
+                    }else if (message.Substring(0, 3) == "/cl")
+                    {
+                        TcpClient currentclient = _clientsList[int.Parse(message.Split(" ")[1])];
+                        //Console.WriteLine(int.Parse(message.Split(" ")[1]));
+                        IPEndPoint remoteEndPoint = currentclient.Client.RemoteEndPoint as IPEndPoint;
+                        IPEndPoint localEndPoint = currentclient.Client.LocalEndPoint as IPEndPoint;
+                        ServerWrite($"--------------------------");
+                        ServerWrite($"Удаленный IP-адрес клиента: {remoteEndPoint.Address}");
+                        ServerWrite($"Удаленный порт клиента: {remoteEndPoint.Port}");
+                        ServerWrite($"Локальный IP-адрес сервера: {localEndPoint.Address}");
+                        ServerWrite($"Локальный порт сервера: {localEndPoint.Port}");
+                        ServerWrite($"--------------------------");
+                    } else if (message.Substring(0, 5) == "/tell")
+                    {
+                        TcpClient currentclient = _clientsList[int.Parse(message.Split(" ")[1])];
+                        string tell = message.Split("\'")[1];
+                        Responce(currentclient, tell);;
+                      
+                    }
+                }
 
-                string response = "Сообщение получено";
+
+                
+            }
+
+            void Responce(TcpClient client, string response)
+            {
+                NetworkStream stream = client.GetStream();
                 byte[] responseData = Encoding.UTF8.GetBytes(response);
                 stream.Write(responseData, 0, responseData.Length);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Ошибка: {ex.Message}");
-            }
         }
-        
-        // finally
-        // {
-        //     client.Close();
-        //     _clientsList.Remove(client); 
-        //     ServerResponce($"Count of clients: {_clientsList.Count}.");
-        //
-        // }
+        catch (Exception ex)
+        {
+            ServerWrite($"Ошибка: {ex.Message}");
+        }
+        finally
+        {
+            client.Close();
+            _clientsList.Remove(client);
+            ServerWrite($"Client left");
+            ServerWrite($"Count of clients: {_clientsList.Count}.");
+        }
 
     }
     
