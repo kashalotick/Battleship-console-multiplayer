@@ -53,12 +53,12 @@ class Program
             PrintColored("2 - Host", hostColor);
 
             input = Console.ReadKey();
-            if (input.KeyChar == '1' || input.KeyChar == 'w')
+            if (input.KeyChar == '1' || input.KeyChar == 'w' || input.Key == ConsoleKey.UpArrow)
             {
                 mode = 1;
                 hostColor = ConsoleColor.Gray;
                 joinColor = ConsoleColor.Yellow;
-            } else if (input.KeyChar == '2' || input.KeyChar == 's')
+            } else if (input.KeyChar == '2' || input.KeyChar == 's' || input.Key == ConsoleKey.DownArrow)
             {
                 mode = 2;
                 hostColor = ConsoleColor.Yellow;
@@ -78,12 +78,12 @@ class Program
         {
             Console.Clear();
             Console.WriteLine("Enter the adress for connection - ip:port");
-            string adress = Console.ReadLine();
-            if (adress[adress.Length - 4] != ':')
-                adress += ":5000";
+            string address = Console.ReadLine();
+            if (address[address.Length - 4] != ':')
+                address += ":5000";
             
-            string ipAdress = adress.Split(":")[0];
-            string port = adress.Split(":")[1];
+            string ipAddress = address.Split(":")[0];
+            string port = address.Split(":")[1];
             string name;
 
             Console.WriteLine("Enter your name");
@@ -93,18 +93,19 @@ class Program
                 name = Console.ReadLine();
             } while (name.Length < 1);
             
-            Client client = new Client(ipAdress, port, name);
-            client.Callback();
+            Client client = new Client(ipAddress, port, name);
+            client.Connect();
         }
         else
         {
             string portStr;
             int port;
-            string ipAdress = "localhost";
+            string ipAddress = "localhost";
             string name;
             
+            
             Console.Clear();
-            Console.WriteLine("Enter the port (default: 5000)");
+            Console.WriteLine("Enter the port (default: Windows: 5000, Mac: 5001)");
             
             readPort:
             Console.SetCursorPosition(0, 1);
@@ -113,7 +114,20 @@ class Program
             portStr = Console.ReadLine();
             if (portStr == "")
             {
-                portStr = "5000";
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    portStr = "5000";
+                    Console.WriteLine("Windows");
+                } else if (Environment.OSVersion.Platform == PlatformID.Unix)
+                {
+                    portStr = "5001";
+                    Console.WriteLine("Mac");
+                }
+                else
+                {
+                    PrintColored("Unknown OS, write it yourself", ConsoleColor.Red);
+                    goto readPort;
+                }
                 Console.SetCursorPosition(0, 1);
                 Console.WriteLine(portStr);
             } else if (portStr.Length != 4)
@@ -131,8 +145,6 @@ class Program
                 PrintColored("Invalid port.", ConsoleColor.Red);
                 goto readPort;
             }
-
-            Server server = new Server(port);
             
             Console.WriteLine("Enter your name");
             do
@@ -140,10 +152,17 @@ class Program
                 Console.SetCursorPosition(0, 3);
                 name = Console.ReadLine();
             } while (name.Length < 1);
-
-
-            Client client = new Client(ipAdress, portStr, name);
-            client.Callback();
+            
+            Server server = new Server(port);
+            Thread serverThread = new Thread(new ThreadStart(server.Start));
+            serverThread.Start();
+            
+            Thread.Sleep(1000);
+            
+            Client client = new Client(ipAddress, portStr, name);
+            client.Connect();
+            
+            // serverThread.Join();
         }
         
         
@@ -165,6 +184,7 @@ class Program
         
     }
 }
+//localhost:5001
 /*
  
 0  1  2  3  4

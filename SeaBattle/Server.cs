@@ -22,8 +22,8 @@ public class Server
         _server.Start();
         _active = true;
         
-        ServerResponce("Server started.");
-        ServerResponce("Waiting for clients...");
+        ServerWrite("Server started.");
+        ServerWrite("Waiting for clients...");
 
         while (_active)
         {
@@ -31,26 +31,64 @@ public class Server
             
             if (_clientsList.Count < 2)
             {
-                ServerResponce("Client connected.");
+                ServerWrite("Client connected.");
                 _clientsList.Add(client);
-                ServerResponce($"Count of clients: {_clientsList.Count}.");
+                ServerWrite($"Count of clients: {_clientsList.Count}.");
+                ServerResponce(client, "Successful connection", "success");
+
                 
                 Thread clientThread = new Thread(HandleClient);
                 clientThread.Start(client);
             }
             else
             {
-                ServerResponce("Connection rejectted");
-                SendError(client, "Connection rejected - server if full.");
+                ServerWrite("Connection rejectted");
+                ServerResponce(client, "Connection rejected - server if full.", "error");
                 client.Close();
             }
 
         }
     }
-
-    private void HandleClient(object client)
+    
+    private void HandleClient(object obj)
     {
-        // ServerResponce("Handle is working"); 
+        TcpClient client = (TcpClient)obj;
+        NetworkStream stream = client.GetStream();
+
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while (_active)
+        {
+            try
+            {
+                bytesRead = stream.Read(buffer, 0, buffer.Length);
+                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                ServerWrite($"Получено сообщение: {message}");
+                if (message == "/q")
+                {
+                    client.Close();
+                    _clientsList.Remove(client); 
+                    ServerWrite($"Count of clients: {_clientsList.Count}.");
+                    break;
+                }
+                string response = "Сообщение получено";
+                byte[] responseData = Encoding.UTF8.GetBytes(response);
+                stream.Write(responseData, 0, responseData.Length);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка: {ex.Message}");
+            }
+        }
+        
+        // finally
+        // {
+        //     client.Close();
+        //     _clientsList.Remove(client); 
+        //     ServerResponce($"Count of clients: {_clientsList.Count}.");
+        //
+        // }
+
     }
     
     public void Stop()
@@ -60,17 +98,14 @@ public class Server
     }
     
     
-    
-    
-    
-    
-    private void SendError(TcpClient client, string errorMessage)
+    private void ServerResponce(TcpClient client, string errorMessage, string note)
     {
         NetworkStream stream = client.GetStream();
+        errorMessage += $"!{note}";
         byte[] data = Encoding.UTF8.GetBytes(errorMessage);
         stream.Write(data, 0, data.Length);
     }
-    private void ServerResponce(string message)
+    private void ServerWrite(string message)
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine(message);
