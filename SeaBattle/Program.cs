@@ -76,9 +76,15 @@ class Program
 
         if (mode == 1)
         {
+            // -----------------------------------
+            // Insta Test
+            
             string ipAddress = "localhost";
             string port = "5000";
             string name = "Client";
+            
+            // -----------------------------------
+
             
             // string ipAddress;
             // string port;
@@ -106,14 +112,17 @@ class Program
             //     Console.SetCursorPosition(0, 3);
             //     name = Console.ReadLine();
             // } while (name.Length < 1);
-            
+            Console.WriteLine($"{name} - {ipAddress}:{port}");
             Client client = new Client(ipAddress, port, name);
             client.Connect();
         }
         else
         {  
-            string portStr = "5001";
-            int port = 5001;
+            // -----------------------------------
+            // Insta Test
+            
+            string portStr = "5000";
+            int port = 5000;
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 portStr = "5001";
@@ -121,6 +130,8 @@ class Program
             }
             string ipAddress = "localhost";
             string name = "HOST";
+            
+            // -----------------------------------
             
             // string portStr;
             // int port;

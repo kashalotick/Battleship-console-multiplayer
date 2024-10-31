@@ -14,17 +14,30 @@ public class Client
     private readonly string _name;
     private bool _connected;
     private NetworkStream _stream;
+    private string _recievedData;
+    
     public Matrix Field = new Matrix(10, 10);
     public Matrix MergedField = new Matrix(10, 10);
-    public Matrix EnemyField = new Matrix(10, 10);
+
     public int PosX;
     public int PosY;
-    private string _recievedData;
-    private object[][] _shipCoordinates = [[0, 0, 0, 0], [0, 0, 0], [0, 0], [0]];
+
+    private Ship[][] _confirmedShips = [[null, null, null, null], [null, null, null], [null, null], [null]];
+    private Ship[][] _shipCoordinates = [[null, null, null, null], [null, null, null], [null, null], [null]];
     private int[][] _ships= [[1, 1, 1, 1], [1, 1, 1], [1, 1], [1]];
+    private int _shipsCount = 10;
     private (int type, int status) _currentShip = (0, 0);
-    private string _cursor = "select";
-    private bool _vertical = false;
+    
+    private bool _vertical;
+    private bool _allowToPlace = true;
+    private bool _fixSelection;
+    private bool _allowToConfirm;
+    
+    private bool _ready = false;
+    
+    
+    
+    public Matrix EnemyField = new Matrix(10, 10);
     public Client(string ipAddress, string port, string name)
     {
         _port = int.Parse(port);
@@ -56,20 +69,87 @@ public class Client
         Thread receiveThread = new Thread(ReceiveMessages);
         receiveThread.Start();
 
+        // -----------------------------------
+        // Insta Test
+        Field.Mtrx = new int[10, 10]
+        { 
+            {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
+            {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
+            {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+            {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+            {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
+        };
+        _shipsCount = 0;
+        _allowToConfirm = true;
+        _ready = true;
+        // -----------------------------------
         
-            
+        PlacingShips(data);
+        
+
+
+        if (_connected)
+        {
+            _connected = false;
+            data = Encoding.UTF8.GetBytes($"/q");
+            _stream.Write(data, 0, data.Length);
+            Thread.Sleep(250);
+        }
+    }
+
+    private void PlacingShips(byte[] data)
+    {
         while (true)
         {
-            Console.Clear();
+            
+            // Console.Clear();
+            if (_ready)
+            {
+                PrintColored("Ready", ConsoleColor.Green);
+                break;
+            }
+            
+            
             VisualiseShip(); 
             MergedField.WriteMatrix(PosX, PosY);
+            if (MergedField.AllowToPlace)
+                _allowToPlace = true;
+            else
+                _allowToPlace = false;
+            if (_ships[_currentShip.type][_currentShip.status] == 0)
+                _fixSelection = true;
+            else 
+                _fixSelection = false;
+            
             DrawShips();
-            Console.WriteLine($"{PosX}, {PosY}");
-            Console.WriteLine(_currentShip);
-            Console.WriteLine(_cursor);
-            Console.WriteLine(_vertical);
-            string input;
+            Console.ForegroundColor = ConsoleColor.Gray;
+            if (_shipsCount == 0)
+            {
+                if (_allowToConfirm)
+                    PrintColored("Press C to confirm", ConsoleColor.Yellow);
+                else
+                    PrintColored("Press C to continue", ConsoleColor.Gray);
+            }
+
+            // Console.WriteLine($"{PosX}, {PosY}");
+            // Console.WriteLine(_currentShip);
+            // Console.WriteLine(_cursor);
+            // Console.WriteLine(_vertical);
+
+            // Console.WriteLine($"Count: {_shipsCount}");
+            // PrintColored($"{_allowToPlace}", ConsoleColor.Magenta);
+            // PrintColored($"{_fixSelection}", ConsoleColor.Magenta);
+            // Console.WriteLine($"||{ship.type}, {ship.x}, {ship.y}, {ship.vertical}||");
+           
+            Ship ship = _shipCoordinates[_currentShip.type][_currentShip.status];
             ConsoleKeyInfo inputKey = Console.ReadKey();
+            string input;
+            
             if (inputKey.KeyChar == 'e' || inputKey.KeyChar == 'у')
             {
                 input = "";
@@ -90,20 +170,24 @@ public class Client
                 switch (inputKey.Key)
                 {
                     case ConsoleKey.W:
-                    case ConsoleKey.UpArrow:
-                        PosY--;
+                    case ConsoleKey.UpArrow: 
+                        if (!_fixSelection)
+                            PosY--;
                         break;
                     case ConsoleKey.A:
                     case ConsoleKey.LeftArrow:
-                        PosX--;
+                        if (!_fixSelection)
+                            PosX--;
                         break;
                     case ConsoleKey.S:
                     case ConsoleKey.DownArrow:
-                        PosY++;
+                        if (!_fixSelection)
+                            PosY++;
                         break;
                     case ConsoleKey.D:
                     case ConsoleKey.RightArrow:
-                        PosX++;
+                        if (!_fixSelection)
+                            PosX++;
                         break;
                     case ConsoleKey.D1:
                     case ConsoleKey.D2:
@@ -112,14 +196,38 @@ public class Client
                         ChooseShip(int.Parse(inputKey.KeyChar.ToString()));
                         break;
                     case ConsoleKey.R:
+                        if (!_fixSelection)
                             _vertical = !_vertical;
                         break;
+                    case ConsoleKey.C:
+                        if (_shipsCount == 0)
+                        {
+                            if (!_allowToConfirm )
+                                _allowToConfirm = true;
+                            else if (_allowToConfirm)
+                            {
+                                if (!_ready)
+                                {
+                                    _ready = true;
+                                    PrintColored("Confirmed. Ready", ConsoleColor.Green);
+                                }
+                                else
+                                    PrintColored("Cannot Confirm", ConsoleColor.Red);
+                            }
+                        }
+                        break;
+                    case ConsoleKey.Escape:
+                        if (_allowToConfirm && _shipsCount == 0)
+                            _allowToConfirm = false;
+                        break;
                     case ConsoleKey.Enter:
-                        _ships[_currentShip.type][_currentShip.status] = 0;
-                        ChooseShip(_currentShip.type + 1);
+                        PlaceShip();
                         break;
                     case ConsoleKey.Backspace:
-                        _ships[_currentShip.type][_currentShip.status] = 1;
+                        if (!_allowToConfirm)
+                            DeleteShip();
+                        else
+                            _allowToConfirm = false;
                         break;
                 }
             }
@@ -145,11 +253,7 @@ public class Client
                 PosX++;
             
             Console.WriteLine(_recievedData);
-        }
-        if (_connected)
-        {
-            _connected = false;
-            Thread.Sleep(250);
+
         }
     }
 
@@ -157,29 +261,123 @@ public class Client
     {
         Matrix Selection = new Matrix(10, 10);
         Ship shipData = new Ship(_currentShip.type, PosY, PosX, _vertical);
+        
+        Selection.Mtrx = ReWriteField(Selection, PosX, PosY, 5);
         _shipCoordinates[_currentShip.type][_currentShip.status] = shipData;
-        if (_vertical)
+        MergedField.Mtrx = Selection.Mtrx;
+        MergedField.Mtrx = Selection.MergeMatrix(Field, Selection, 10, 10);
+    }
+
+    private void PlaceShip()
+    {
+        int ifPlaced = _ships[_currentShip.type][_currentShip.status];
+        Ship ship = _shipCoordinates[_currentShip.type][_currentShip.status];
+        _confirmedShips[_currentShip.type][_currentShip.status] = ship;
+        if (ifPlaced == 1 && _allowToPlace)
         {
-            for (int i = PosY; i <= _currentShip.type; i++)
-            {
-                Selection.Mtrx[i, PosX] = 5;
-                PrintColored($"({i}, {PosX}", ConsoleColor.Magenta);
-            }
+            _shipsCount--;
+            _ships[_currentShip.type][_currentShip.status] = 0;
+            Field.Mtrx = ReWriteField(Field, ship.x, ship.y, 1);
+            ChooseShip(_currentShip.type + 1);
+        }
+    }
+    
+    private void DeleteShip()
+    {
+        int ifPlaced = _ships[_currentShip.type][_currentShip.status];
+        Ship ship = _shipCoordinates[_currentShip.type][_currentShip.status];
+        _confirmedShips[_currentShip.type][_currentShip.status] = null;
+        if (ifPlaced == 0)
+        {
+            _shipsCount++;
+            _ships[_currentShip.type][_currentShip.status] = 1;
+            Field.Mtrx = ReWriteField(Field, ship.x, ship.y, 0);
+        }
+    }
+    
+    private int[,] ReWriteField(Matrix field, int x, int y, int value)
+    {
+        if (value == 5)
+        {
+            field.Mtrx = CheckFieldArea(field, x, y);
         }
         else
         {
-            for (int i = PosX; i <= _currentShip.type; i++)
-            {
-                Selection.Mtrx[PosY, i] = 5;
-                PrintColored($"({PosY}, {i}", ConsoleColor.Magenta);
+            if (_vertical)
+                for (int i = y; i <= y + _currentShip.type; i++)
+                    field.Mtrx[i, x] = value;
+            else {
+                for (int i = x; i <= x + _currentShip.type; i++)
+                    field.Mtrx[y, i] = value;}
+        }
+        
+        
+        return field.Mtrx;
+    }
 
+    private int[,] CheckFieldArea(Matrix field, int x, int y)
+    {
+        if (_vertical)
+        {
+            for (int i = y; i <= y + _currentShip.type; i++)
+            {
+                if (x-1 >= 0)
+                    field.Mtrx[i, x-1] = 2;
+                if (x+1 <= 9)
+                    field.Mtrx[i, x+1] = 2;
+                field.Mtrx[i, x] = 5;
+            }
+            if (y-1 >= 0)
+            {
+                for (int i = x - 1; i <= x + 1 ; i++)
+                {
+                    if (i >= 0 && i <= 9)
+                        field.Mtrx[y-1, i] = 2;
+                }
+            }
+            if (y+1+_currentShip.type <= 9)
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    if (i >= 0 && i <= 9)
+                        field.Mtrx[y+1+_currentShip.type, i] = 2;
+                }
+            }
+
+                
+        }
+        else
+        {
+            for (int i = x; i <= x + _currentShip.type; i++)
+            {
+                if (y-1 >= 0)
+                    field.Mtrx[y-1, i] = 2;
+                if (y+1 <= 9)
+                    field.Mtrx[y+1, i] = 2;
+                field.Mtrx[y, i] = 5;
+            }
+            if (x-1 >= 0)
+            {
+                for (int i = y - 1; i <= y + 1 ; i++)
+                {
+                    if (i >= 0 && i <= 9)
+                        field.Mtrx[i, x-1] = 2;
+                }
+            }
+            if (x+1+_currentShip.type <= 9)
+            {
+                for (int i = y - 1; i <= y + 1; i++)
+                {
+                    if (i >= 0 && i <= 9)
+                        field.Mtrx[i, x+1+_currentShip.type] = 2;
+                }
             }
         }
-        MergedField.Mtrx = Selection.MergeMatrix(Field, Selection, 10, 10);
+        return field.Mtrx;
     }
+
     private void ChooseShip(int ship)
     {
-        
         ship -= 1;
         int t = _currentShip.status;
         
@@ -197,7 +395,15 @@ public class Client
         }
         _currentShip = (ship, t);
         
-        Console.WriteLine($"Cureent Ship: {_currentShip}");
+        
+
+        if (_ships[ship][t] == 0)
+        {
+            Ship selectedShip = _confirmedShips[_currentShip.type][_currentShip.status];
+            PosX = selectedShip.x;
+            PosY = selectedShip.y;
+            _vertical = selectedShip.vertical;
+        }
     }
 
     private void DrawShips()
@@ -214,7 +420,7 @@ public class Client
                     if (_ships[i][j] == 1) 
                         Console.ForegroundColor = ConsoleColor.Yellow;
                     else if (_ships[i][j] == 0) 
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
                 }
                 else
                 {
@@ -223,7 +429,7 @@ public class Client
                     else if (_ships[i][j] == 0) 
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                 }
-                Console.Write($"({i}, {j})");
+                //Console.Write($"({i}, {j})");
                 for (int k = 0; k < i + 1; k++)
                 {
                     Console.Write('\u25a0');
@@ -235,10 +441,6 @@ public class Client
             Console.Write("\n");
             i++;
         }
-    }
-    private void PlacingShips()
-    {
-        Field.WriteMatrix(PosX, PosY);
     }
 
     private void ReceiveMessages()

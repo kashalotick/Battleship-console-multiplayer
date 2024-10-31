@@ -155,6 +155,11 @@ public class Server
             _clientsList.Remove(client);
             ServerWrite($"Client left");
             ServerWrite($"Count of clients: {_clientsList.Count}.");
+            if (_clientsList.Count == 0)
+            {
+                ServerWrite($"Server is closed.");
+                _server.Stop();
+            }
         }
 
     }

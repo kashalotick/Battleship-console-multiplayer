@@ -2,9 +2,10 @@
 
 public class Matrix
 {
-    public int Cols;
-    public int Rows;
+    public readonly int Cols;
+    public readonly int Rows;
     public int[,] Mtrx;
+    public bool AllowToPlace;
     
     
     public Matrix(int rows, int columns)
@@ -16,6 +17,7 @@ public class Matrix
 
     public void WriteMatrix(int x, int y)
     {
+        AllowToPlace = true;
         Console.ForegroundColor = ConsoleColor.Gray;
         // PrintColoredTextBG("-  ", ConsoleColor.Black, ConsoleColor.White);
         // Console.ForegroundColor = ConsoleColor.Gray;
@@ -34,14 +36,16 @@ public class Matrix
                 switch (element)
                 {
                     case 0:
-                        symbol = "\u2219";
+                        symbol = " ";
                         break;
-                    case 5:
                     case 1:
+                    case 5:
+                    case 15:
+                    case 12:
                         symbol = "\u25a0";
                         break;
-                    case 6:
                     case 2:
+                    case 6:
                         symbol = "\u2219";
                         break;
                     case 3:
@@ -51,7 +55,7 @@ public class Matrix
                         symbol = "\u25a1";
                         break;
                 }
-                
+
                 // if ((j + i) % 2 == 0)
                 // {
                 //     Console.BackgroundColor = ConsoleColor.DarkGray;
@@ -60,12 +64,19 @@ public class Matrix
                 // {
                 //     Console.BackgroundColor = ConsoleColor.Black;
                 // }
-                if (i == y && j == x || element == 5)
+                if (element > 10)
                 {
-                    PrintColored($" {element} ", ConsoleColor.Yellow);
+                    PrintColored($" {symbol} ", ConsoleColor.Red);
+                    AllowToPlace = false;
+                }
+                else if (i == y && j == x || element == 5 || element == 2)
+                {
+                    PrintColored($" {symbol} ", ConsoleColor.Yellow);
                 }
                 else
-                    Console.Write($" {element} ");
+                {
+                    Console.Write($" {symbol} ");
+                }
             }
             Console.WriteLine();
         }
@@ -93,7 +104,7 @@ public class Matrix
                     }
                     else
                     {
-                        result[i, j] = -element2;
+                        result[i, j] = element2 + 10;
                     }
                 }
             }
