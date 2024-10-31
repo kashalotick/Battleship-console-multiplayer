@@ -112,8 +112,13 @@ class Program
         }
         else
         {  
-            string portStr = "5000";
-            int port = 5000;
+            string portStr = "5001";
+            int port = 5001;
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                portStr = "5001";
+                port = 5001;
+            }
             string ipAddress = "localhost";
             string name = "HOST";
             

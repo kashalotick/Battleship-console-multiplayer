@@ -15,11 +15,12 @@ public class Client
     private bool _connected;
     private NetworkStream _stream;
     public Matrix Field = new Matrix(10, 10);
-    public Matrix Selection = new Matrix(10, 10);
+    public Matrix MergedField = new Matrix(10, 10);
     public Matrix EnemyField = new Matrix(10, 10);
     public int PosX;
     public int PosY;
     private string _recievedData;
+    private object[][] _shipCoordinates = [[0, 0, 0, 0], [0, 0, 0], [0, 0], [0]];
     private int[][] _ships= [[1, 1, 1, 1], [1, 1, 1], [1, 1], [1]];
     private (int type, int status) _currentShip = (0, 0);
     private string _cursor = "select";
@@ -60,11 +61,13 @@ public class Client
         while (true)
         {
             Console.Clear();
-            Field.WriteMatrix(PosX, PosY);
+            VisualiseShip(); 
+            MergedField.WriteMatrix(PosX, PosY);
             DrawShips();
             Console.WriteLine($"{PosX}, {PosY}");
             Console.WriteLine(_currentShip);
             Console.WriteLine(_cursor);
+            Console.WriteLine(_vertical);
             string input;
             ConsoleKeyInfo inputKey = Console.ReadKey();
             if (inputKey.KeyChar == 'e' || inputKey.KeyChar == 'у')
@@ -87,15 +90,19 @@ public class Client
                 switch (inputKey.Key)
                 {
                     case ConsoleKey.W:
+                    case ConsoleKey.UpArrow:
                         PosY--;
                         break;
                     case ConsoleKey.A:
+                    case ConsoleKey.LeftArrow:
                         PosX--;
                         break;
                     case ConsoleKey.S:
+                    case ConsoleKey.DownArrow:
                         PosY++;
                         break;
                     case ConsoleKey.D:
+                    case ConsoleKey.RightArrow:
                         PosX++;
                         break;
                     case ConsoleKey.D1:
@@ -103,6 +110,9 @@ public class Client
                     case ConsoleKey.D3:
                     case ConsoleKey.D4:
                         ChooseShip(int.Parse(inputKey.KeyChar.ToString()));
+                        break;
+                    case ConsoleKey.R:
+                            _vertical = !_vertical;
                         break;
                     case ConsoleKey.Enter:
                         _ships[_currentShip.type][_currentShip.status] = 0;
@@ -114,14 +124,25 @@ public class Client
                 }
             }
 
+            if (_vertical)
+            {
+                if (PosY > 9 - _currentShip.type)
+                    PosY = 9 - _currentShip.type;
+                else if (PosX > 9)
+                    PosX--;
+            }
+            else
+            { 
+                if (PosY > 9)
+                    PosY--;
+                else if (PosX > 9 - _currentShip.type)
+                    PosX = 9 - _currentShip.type;
+            }
+            
             if (PosY < 0)
                 PosY++;
-            else if (PosY > 9)
-                PosY--;
             else if (PosX < 0)
                 PosX++;
-            else if (PosX > 9)
-                PosX--;
             
             Console.WriteLine(_recievedData);
         }
@@ -132,6 +153,30 @@ public class Client
         }
     }
 
+    private void VisualiseShip()
+    {
+        Matrix Selection = new Matrix(10, 10);
+        Ship shipData = new Ship(_currentShip.type, PosY, PosX, _vertical);
+        _shipCoordinates[_currentShip.type][_currentShip.status] = shipData;
+        if (_vertical)
+        {
+            for (int i = PosY; i <= _currentShip.type; i++)
+            {
+                Selection.Mtrx[i, PosX] = 5;
+                PrintColored($"({i}, {PosX}", ConsoleColor.Magenta);
+            }
+        }
+        else
+        {
+            for (int i = PosX; i <= _currentShip.type; i++)
+            {
+                Selection.Mtrx[PosY, i] = 5;
+                PrintColored($"({PosY}, {i}", ConsoleColor.Magenta);
+
+            }
+        }
+        MergedField.Mtrx = Selection.MergeMatrix(Field, Selection, 10, 10);
+    }
     private void ChooseShip(int ship)
     {
         

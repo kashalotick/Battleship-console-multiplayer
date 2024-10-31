@@ -16,6 +16,7 @@ public class Matrix
 
     public void WriteMatrix(int x, int y)
     {
+        Console.ForegroundColor = ConsoleColor.Gray;
         // PrintColoredTextBG("-  ", ConsoleColor.Black, ConsoleColor.White);
         // Console.ForegroundColor = ConsoleColor.Gray;
         // for (int i = 0; i < Cols; i++)
@@ -59,7 +60,7 @@ public class Matrix
                 // {
                 //     Console.BackgroundColor = ConsoleColor.Black;
                 // }
-                if (i == y && j == x)
+                if (i == y && j == x || element == 5)
                 {
                     PrintColored($" {element} ", ConsoleColor.Yellow);
                 }
@@ -68,7 +69,7 @@ public class Matrix
             }
             Console.WriteLine();
         }
-        Console.BackgroundColor = ConsoleColor.Black;
+        // Console.BackgroundColor = ConsoleColor.Black;
     }
 
     public int[,] MergeMatrix(Matrix mat1, Matrix mat2, int cols, int rows)
