@@ -28,6 +28,7 @@ public class Matrix
         // Console.Write("\n");
         for (int i = 0; i < Rows; i++)
         {
+            Console.Write($"{i} \u239f");
             // PrintColoredTextBG($"{i}  ", ConsoleColor.Black, ConsoleColor.White);
             for (int j = 0; j < Cols; j++)
             {
@@ -78,6 +79,7 @@ public class Matrix
                     Console.Write($" {symbol} ");
                 }
             }
+            Console.Write("\u239c");
             Console.WriteLine();
         }
         // Console.BackgroundColor = ConsoleColor.Black;

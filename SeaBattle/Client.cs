@@ -71,20 +71,20 @@ public class Client
 
         // -----------------------------------
         // Insta Test
-        Field.Mtrx = new int[10, 10]
-        { 
-            {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
-            {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
-            {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-            {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-            {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
-        };
-        _shipsCount = 0;
+        // Field.Mtrx = new int[10, 10]
+        // { 
+        //     {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
+        //     {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
+        //     {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+        //     {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+        //     {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
+        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //     {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
+        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //     {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
+        // };
+        // _shipsCount = 0;
         //_allowToConfirm = true;
         //_ready = true;
         // -----------------------------------
@@ -117,10 +117,10 @@ public class Client
         PrintColored("Waiting for opponent...", ConsoleColor.DarkGray);
         while (true)
         {
-            if (_recievedData != "!ReadyForPlacingShips!")
-            {
-                continue;
-            }
+            // if (_recievedData != "!ReadyForPlacingShips!")
+            // {
+            //     continue;
+            // }
             // Console.Clear();
             if (_ready)
             {
@@ -128,7 +128,10 @@ public class Client
                 break;
             }
             
-            
+            //Console.WriteLine("——————————————————————————————");
+            Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
+            Console.WriteLine("  ________________________________");
+
             VisualiseShip(); 
             MergedField.WriteMatrix(PosX, PosY);
             if (MergedField.AllowToPlace)
@@ -139,7 +142,9 @@ public class Client
                 _fixSelection = true;
             else 
                 _fixSelection = false;
-            
+            Console.WriteLine("  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
+            // Console.WriteLine("——————————————————————————————");
+
             DrawShips();
             Console.ForegroundColor = ConsoleColor.Gray;
             if (_shipsCount == 0)
@@ -426,6 +431,7 @@ public class Client
         foreach (int[] stack in _ships)
         {
             int j = 0;
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write($"{i + 1}: ");
             foreach (int ship in stack)
             {
