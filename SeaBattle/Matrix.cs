@@ -28,7 +28,7 @@ public class Matrix
         // Console.Write("\n");
         for (int i = 0; i < Rows; i++)
         {
-            Console.Write($"{i} \u239f");
+            Console.Write($"{i} |");
             // PrintColoredTextBG($"{i}  ", ConsoleColor.Black, ConsoleColor.White);
             for (int j = 0; j < Cols; j++)
             {

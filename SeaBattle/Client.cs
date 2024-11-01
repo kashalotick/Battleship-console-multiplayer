@@ -40,6 +40,7 @@ public class Client
     public Matrix EnemyField = new Matrix(10, 10);
     public Client(string ipAddress, string port, string name)
     {
+        Console.CursorVisible = false;
         _port = int.Parse(port);
         _ipAddress = ipAddress;
         // (_ipAddress, ConsoleColor.Yellow);
@@ -71,23 +72,23 @@ public class Client
 
         // -----------------------------------
         // Insta Test
-        // Field.Mtrx = new int[10, 10]
-        // { 
-        //     {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
-        //     {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
-        //     {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-        //     {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-        //     {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
-        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //     {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
-        //     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //     {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
-        // };
-        // _shipsCount = 0;
-        //_allowToConfirm = true;
-        //_ready = true;
-        // -----------------------------------
+        //  Field.Mtrx = new int[10, 10]
+        //  { 
+        //      {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
+        //      {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
+        //      {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+        //      {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+        //      {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
+        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //      {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
+        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        //      {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
+        //  };
+        //  _shipsCount = 0;
+        // _allowToConfirm = true;
+        // _ready = true;
+ // -----------------------------------
         
         PlacingShips(data);
         data = Encoding.UTF8.GetBytes($"!ReadyFoPlay!");
