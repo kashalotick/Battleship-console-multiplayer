@@ -13,6 +13,8 @@ public class Server
     private readonly List<TcpClient> _clientsList = new List<TcpClient>();
     private readonly int _port;
     private bool _active = false;
+
+    private int _readyCount = 0;
     
     public Server(int port)
     {
@@ -67,8 +69,7 @@ public class Server
                 
                     ServerWrite($"Count of clients: {_clientsList.Count}.");
                     ServerResponce(client, "Successful connection", "success");
-                
-                
+                    
                     Thread clientThread = new Thread(HandleClient);
                     clientThread.Start(client);
                 }
@@ -88,7 +89,13 @@ public class Server
         TcpClient client = (TcpClient)obj;
         NetworkStream stream = client.GetStream();
 
-        
+        if (_clientsList.Count == 2)
+        {
+            foreach (var player in _clientsList)
+            {
+                Responce(player, "!ReadyForPlacingShips!");
+            }
+        }
         int bytesRead;
 
         try
@@ -113,7 +120,10 @@ public class Server
                         {
                             ServerWrite(ip + ":" + _port);
                         }
-                    }else if (message.Substring(0, 3) == "/cl")
+                    } else if (message == "/q")
+                    {
+                        break;
+                    } else if (message.Substring(0, 3) == "/cl")
                     {
                         TcpClient currentclient = _clientsList[int.Parse(message.Split(" ")[1])];
                         //Console.WriteLine(int.Parse(message.Split(" ")[1]));
@@ -129,20 +139,24 @@ public class Server
                     {
                         TcpClient currentclient = _clientsList[int.Parse(message.Split(" ")[1])];
                         string tell = message.Split("\'")[1];
-                        Responce(currentclient, tell);;
-                      
+                        Responce(currentclient, tell);
+
+                    }
+                } else if (message[0] == '!')
+                {
+                    if (message == "!ReadyFoPlay!")
+                    {
+                        _readyCount++;
+                        ServerWrite($"Players ready: {_readyCount}");
+                        if (_readyCount == 2)
+                        {
+                            foreach (var player in _clientsList)
+                            {
+                                Responce(player, "!GameStarted!");
+                            }
+                        }
                     }
                 }
-
-
-                
-            }
-
-            void Responce(TcpClient client, string response)
-            {
-                NetworkStream stream = client.GetStream();
-                byte[] responseData = Encoding.UTF8.GetBytes(response);
-                stream.Write(responseData, 0, responseData.Length);
             }
         }
         catch (Exception ex)
@@ -158,8 +172,14 @@ public class Server
             if (_clientsList.Count == 0)
             {
                 ServerWrite($"Server is closed.");
-                _server.Stop();
+                Stop();
             }
+        }
+        void Responce(TcpClient client, string response)
+        {
+            NetworkStream stream = client.GetStream();
+            byte[] responseData = Encoding.UTF8.GetBytes(response);
+            stream.Write(responseData, 0, responseData.Length);
         }
 
     }

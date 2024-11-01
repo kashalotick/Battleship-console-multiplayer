@@ -33,7 +33,7 @@ public class Client
     private bool _fixSelection;
     private bool _allowToConfirm;
     
-    private bool _ready = false;
+    private bool _ready;
     
     
     
@@ -85,13 +85,23 @@ public class Client
             {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
         };
         _shipsCount = 0;
-        _allowToConfirm = true;
-        _ready = true;
+        //_allowToConfirm = true;
+        //_ready = true;
         // -----------------------------------
         
         PlacingShips(data);
-        
+        data = Encoding.UTF8.GetBytes($"!ReadyFoPlay!");
+        _stream.Write(data, 0, data.Length);
+        PrintColored("Waiting for opponent...", ConsoleColor.DarkGray);
 
+        while (true)
+        {
+            if (_recievedData == "!GameStarted!")
+            {
+                break;
+            }
+        }
+        PrintColored("Game started!!!", ConsoleColor.Magenta);
 
         if (_connected)
         {
@@ -101,12 +111,16 @@ public class Client
             Thread.Sleep(250);
         }
     }
-
+    
     private void PlacingShips(byte[] data)
     {
+        PrintColored("Waiting for opponent...", ConsoleColor.DarkGray);
         while (true)
         {
-            
+            if (_recievedData != "!ReadyForPlacingShips!")
+            {
+                continue;
+            }
             // Console.Clear();
             if (_ready)
             {
@@ -412,9 +426,9 @@ public class Client
         foreach (int[] stack in _ships)
         {
             int j = 0;
+            Console.Write($"{i + 1}: ");
             foreach (int ship in stack)
             {
-
                 if (_currentShip.type == i && _currentShip.status == j)
                 {
                     if (_ships[i][j] == 1) 

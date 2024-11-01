@@ -81,6 +81,10 @@ class Program
             
             string ipAddress = "localhost";
             string port = "5000";
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                port = "5001";
+            }
             string name = "Client";
             
             // -----------------------------------
