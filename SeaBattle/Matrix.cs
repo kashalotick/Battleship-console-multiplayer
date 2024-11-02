@@ -1,4 +1,6 @@
-﻿namespace SeaBattle;
+﻿using Newtonsoft.Json;
+
+namespace SeaBattle;
 
 public class Matrix
 {
@@ -26,14 +28,19 @@ public class Matrix
         //     PrintColoredTextBG($" {i} ", ConsoleColor.Black, ConsoleColor.White);;
         // }
         // Console.Write("\n");
+        Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
+        Console.WriteLine("  ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖");
         for (int i = 0; i < Rows; i++)
         {
-            Console.Write($"{i} |");
+            Console.Write($"{i} ▐");
             // PrintColoredTextBG($"{i}  ", ConsoleColor.Black, ConsoleColor.White);
             for (int j = 0; j < Cols; j++)
             {
                 int element = Mtrx[i, j];
                 string symbol = " ";
+                
+                // 0  1  2  3  4
+                //     ■  ∙  ✕  □
                 switch (element)
                 {
                     case 0:
@@ -65,7 +72,7 @@ public class Matrix
                 // {
                 //     Console.BackgroundColor = ConsoleColor.Black;
                 // }
-                if (element > 10)
+                if (element > 10 || element == 3 || element == 4)
                 {
                     PrintColored($" {symbol} ", ConsoleColor.Red);
                     AllowToPlace = false;
@@ -79,9 +86,10 @@ public class Matrix
                     Console.Write($" {symbol} ");
                 }
             }
-            Console.Write("\u239c");
+            Console.Write("▌");
             Console.WriteLine();
         }
+        Console.WriteLine("  ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘");
         // Console.BackgroundColor = ConsoleColor.Black;
     }
 

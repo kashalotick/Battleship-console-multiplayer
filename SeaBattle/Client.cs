@@ -40,7 +40,7 @@ public class Client
     public Matrix EnemyField = new Matrix(10, 10);
     public Client(string ipAddress, string port, string name)
     {
-        Console.CursorVisible = false;
+        // Console.CursorVisible = false;
         _port = int.Parse(port);
         _ipAddress = ipAddress;
         // (_ipAddress, ConsoleColor.Yellow);
@@ -66,31 +66,55 @@ public class Client
 
         if (!GetServerResponse(_stream))
             _connected = false;
-        
+
         Thread receiveThread = new Thread(ReceiveMessages);
         receiveThread.Start();
 
         // -----------------------------------
         // Insta Test
-        //  Field.Mtrx = new int[10, 10]
-        //  { 
-        //      {0, 0, 0, 0, 0, 1, 0, 1, 0, 0}, 
-        //      {0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, 
-        //      {0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
-        //      {0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-        //      {0, 1, 0, 1, 1, 1, 0, 0, 0, 1},
-        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //      {0, 1, 1, 0, 0, 0, 0, 1, 0, 0},
-        //      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        //      {1, 0, 1, 0, 0, 1, 1, 0, 0, 0} 
-        //  };
-        //  _shipsCount = 0;
-        // _allowToConfirm = true;
-        // _ready = true;
+        if (_name == "HOST")
+        {
+            Field.Mtrx = new int[10, 10]
+            {
+                { 0, 0, 0, 0, 0, 1, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 1, 0, 1, 1, 1, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 1, 0, 0, 1, 1, 0, 0, 0 }
+            };
+        }
+        else
+        {
+            Field.Mtrx = new int[10, 10]
+            {
+                { 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 1, 0, 1, 0, 0, 1, 1, 0, 0, 1 }
+            };
+        }
+        _shipsCount = 0;
+        _allowToConfirm = true;
+        // if (_name != "HOST") 
+        //     Thread.Sleep(2000);
+        _ready = true;
  // -----------------------------------
         
         PlacingShips(data);
+        string jsonMessage = JsonConvert.SerializeObject(Field.Mtrx);
+        data = Encoding.UTF8.GetBytes(jsonMessage);
+        _stream.Write(data, 0, data.Length);
         data = Encoding.UTF8.GetBytes($"!ReadyFoPlay!");
         _stream.Write(data, 0, data.Length);
         PrintColored("Waiting for opponent...", ConsoleColor.DarkGray);
@@ -103,7 +127,110 @@ public class Client
             }
         }
         PrintColored("Game started!!!", ConsoleColor.Magenta);
+        
 
+        
+// Game itself ------------------------------------------------
+        PosX = 0;
+        PosY = 0;
+        // Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
+        // Console.WriteLine("  ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖");
+        VisualiseShip(); 
+        Field.WriteMatrix(-1, -1);
+        // Console.WriteLine("  ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘");
+        bool waitingMsg = false;
+        int[,] cachedField = Field.Mtrx;
+        while (true)
+        {
+            Thread.Sleep(200);
+            if (cachedField != Field.Mtrx)
+            {
+                cachedField = Field.Mtrx;
+                (int Left, int Top) cursorPos = Console.GetCursorPosition();
+                Field.WriteMatrix(-1, -1);
+
+            }
+            if (_recievedData[0] == '!' && _recievedData.Split(" ")[0] != "!TurnYour!")
+            {
+                if (!waitingMsg)
+                {
+                    PrintColored($"Opponent`s turn...", ConsoleColor.Red);
+                    Thread.Sleep(1000);
+                    waitingMsg = true;
+                }
+                continue;
+            }
+            // ▗▄▖
+            // ▐ ▌
+            // ▝▀▘
+            //PrintColored($"Your turn!", ConsoleColor.Cyan);
+            waitingMsg = false;
+            
+            Console.WriteLine($"[{PosY}, {PosX}]");
+
+            
+            ConsoleKeyInfo inputKey = Console.ReadKey();
+            string input;
+            if (inputKey.KeyChar == '/')
+            {
+                input = Console.ReadLine();
+                data = Encoding.UTF8.GetBytes(input);
+                if (input == "/q")
+                {
+                    break;
+                }
+                _stream.Write(data, 0, data.Length);
+            }
+            else
+            {
+                switch (inputKey.Key)
+                {
+                    case ConsoleKey.W:
+                    case ConsoleKey.UpArrow: 
+                        if (!_fixSelection)
+                            PosY--;
+                        break;
+                    case ConsoleKey.A:
+                    case ConsoleKey.LeftArrow:
+                        if (!_fixSelection)
+                            PosX--;
+                        break;
+                    case ConsoleKey.S:
+                    case ConsoleKey.DownArrow:
+                        if (!_fixSelection)
+                            PosY++;
+                        break;
+                    case ConsoleKey.D:
+                    case ConsoleKey.RightArrow:
+                        if (!_fixSelection)
+                            PosX++;
+                        break;
+                    case ConsoleKey.F:
+                        PrintColored("???????????????????", ConsoleColor.Magenta);
+                        break;
+                    case ConsoleKey.Enter:
+                        data = Encoding.UTF8.GetBytes($"!Shoot! {PosY} {PosX}");
+                        _stream.Write(data, 0, data.Length);
+                        break;
+                }
+
+                if (PosY > 9)
+                    PosY--;
+                if (PosY < 0)
+                    PosY++;
+                if (PosX > 9)
+                    PosX--;
+                if (PosX < 0)
+                    PosX++;
+            }
+           
+            
+            // Thread.Sleep(250);
+            // Console.WriteLine(_recievedData);
+        }
+// Game itself --------------------------------------------------
+
+        
         if (_connected)
         {
             _connected = false;
@@ -113,28 +240,29 @@ public class Client
         }
     }
     
+    
     private void PlacingShips(byte[] data)
     {
         PrintColored("Waiting for opponent...", ConsoleColor.DarkGray);
         while (true)
         {
-            // if (_recievedData != "!ReadyForPlacingShips!")
-            // {
-            //     continue;
-            // }
-            // Console.Clear();
+            if (_recievedData != "!ReadyForPlacingShips!")
+            {
+                continue;
+            }
+            Console.Clear();
             if (_ready)
             {
                 PrintColored("Ready", ConsoleColor.Green);
                 break;
             }
             
-            //Console.WriteLine("——————————————————————————————");
-            Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
-            Console.WriteLine("  ________________________________");
-
+            // Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
+            // Console.WriteLine("  ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖");
             VisualiseShip(); 
             MergedField.WriteMatrix(PosX, PosY);
+            // Console.WriteLine("  ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘");
+            
             if (MergedField.AllowToPlace)
                 _allowToPlace = true;
             else
@@ -143,9 +271,7 @@ public class Client
                 _fixSelection = true;
             else 
                 _fixSelection = false;
-            Console.WriteLine("  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾");
-            // Console.WriteLine("——————————————————————————————");
-
+            
             DrawShips();
             Console.ForegroundColor = ConsoleColor.Gray;
             if (_shipsCount == 0)
@@ -172,9 +298,9 @@ public class Client
             
             if (inputKey.KeyChar == 'e' || inputKey.KeyChar == 'у')
             {
-                input = "";
-                data = Encoding.UTF8.GetBytes($"e: {PosX};{PosY}");
-                _stream.Write(data, 0, data.Length);
+                // input = "";
+                // data = Encoding.UTF8.GetBytes($"e: {PosX};{PosY}");
+                // _stream.Write(data, 0, data.Length);
             } else if (inputKey.KeyChar == '/')
             {
                 input = Console.ReadLine();
@@ -475,7 +601,17 @@ public class Client
                 if (bytesRead == 0)
                     break;
                 string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                if (message[0] == '!')
+                {
+                    if (message.Substring(0, 5) == "!Turn")
+                    {
+                        //PrintColored("Got JSON back", ConsoleColor.Magenta);
+                        PrintColored(message.Split(" ")[0], ConsoleColor.DarkCyan);
+                        Field.Mtrx = JsonConvert.DeserializeObject<int[,]>(message.Split(" ")[1]);
+                    }
+                }
                 _recievedData = message;
+                
                 //PrintColored($"{message}", ConsoleColor.Magenta);
             }
         }
@@ -489,15 +625,7 @@ public class Client
             PrintColored($"Connection closed", ConsoleColor.Yellow);
         }
     }
-
-    public void Callback()
-    {
-        Console.WriteLine(_version);
-        Console.WriteLine(_client);
-        Console.WriteLine(_ipAddress);
-        Console.WriteLine(_port);
-        Console.WriteLine(_name);
-    }
+    
     void PrintColored(string text, ConsoleColor color)
     {
         Console.ForegroundColor = color;
