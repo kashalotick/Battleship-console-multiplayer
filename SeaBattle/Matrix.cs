@@ -19,28 +19,25 @@ public class Matrix
 
     public void WriteMatrix(int x, int y)
     {
+        // ▗▄▖
+        // ▐ ▌
+        // ▝▀▘
+
         AllowToPlace = true;
         Console.ForegroundColor = ConsoleColor.Gray;
-        // PrintColoredTextBG("-  ", ConsoleColor.Black, ConsoleColor.White);
-        // Console.ForegroundColor = ConsoleColor.Gray;
-        // for (int i = 0; i < Cols; i++)
-        // {
-        //     PrintColoredTextBG($" {i} ", ConsoleColor.Black, ConsoleColor.White);;
-        // }
-        // Console.Write("\n");
+
         Console.WriteLine("    0  1  2  3  4  5  6  7  8  9");
-        Console.WriteLine("  ▗▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▖");
+        Console.WriteLine("  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
         for (int i = 0; i < Rows; i++)
         {
-            Console.Write($"{i} ▐");
-            // PrintColoredTextBG($"{i}  ", ConsoleColor.Black, ConsoleColor.White);
+            Console.Write($"{i} █");
             for (int j = 0; j < Cols; j++)
             {
                 int element = Mtrx[i, j];
                 string symbol = " ";
                 
-                // 0  1  2  3  4
-                //     ■  ∙  ✕  □
+                // 0  1  2  3  4  7
+                //    ■  ∙  ✕  □  ◆ 
                 switch (element)
                 {
                     case 0:
@@ -50,34 +47,43 @@ public class Matrix
                     case 5:
                     case 15:
                     case 12:
+                    case 21:
                         symbol = "\u25a0";
                         break;
                     case 2:
                     case 6:
+                    case 16:
+                    case 26:
                         symbol = "\u2219";
                         break;
                     case 3:
+                    case 13:
+                    case 23:
                         symbol = "\u2715";
                         break;
                     case 4:
+                    case 14:
+                    case 24:
                         symbol = "\u25a1";
                         break;
+                    case 7:
+                    case 17 :
+                        symbol = "\u25c6";
+                        break;
                 }
-
-                // if ((j + i) % 2 == 0)
-                // {
-                //     Console.BackgroundColor = ConsoleColor.DarkGray;
-                // }
-                // else
-                // {
-                //     Console.BackgroundColor = ConsoleColor.Black;
-                // }
-                if (element > 10 || element == 3 || element == 4)
+                // Coloring
+                if (element == 13 || element == 14 || element == 16)
+                {
+                    PrintColored($" {symbol} ", ConsoleColor.Magenta);
+                } else if (element > 20)
+                {
+                    PrintColored($" {symbol} ", ConsoleColor.DarkGray);
+                } else if (element > 10 || element == 3 || element == 4)
                 {
                     PrintColored($" {symbol} ", ConsoleColor.Red);
                     AllowToPlace = false;
                 }
-                else if (i == y && j == x || element == 5 || element == 2)
+                else if (i == y && j == x || element == 5 || element == 2 || element == 7)
                 {
                     PrintColored($" {symbol} ", ConsoleColor.Yellow);
                 }
@@ -86,11 +92,10 @@ public class Matrix
                     Console.Write($" {symbol} ");
                 }
             }
-            Console.Write("▌");
+            Console.Write("█");
             Console.WriteLine();
         }
-        Console.WriteLine("  ▝▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▘");
-        // Console.BackgroundColor = ConsoleColor.Black;
+        Console.WriteLine("  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀");
     }
 
     public int[,] MergeMatrix(Matrix mat1, Matrix mat2, int cols, int rows)
@@ -111,6 +116,9 @@ public class Matrix
                     if (element1 == 0)
                     {
                         result[i, j] = element2;
+                    } else if (element2 == 7)
+                    {
+                        result[i, j] = element1 + 10;
                     }
                     else
                     {
@@ -121,24 +129,32 @@ public class Matrix
         }
         return result;
     }
+
+    public int[,] CollapseMatrix(Matrix mat1, Matrix mat2, int cols, int rows)
+    {
+        int[,] result = new int[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                int element1 = mat1.Mtrx[i, j];
+                int element2 = mat2.Mtrx[i, j];
+                if (element1 != element2)
+                {
+                    result[i, j] = element1 + 20;
+                }
+                else
+                {
+                    result[i, j] = element2;
+                }
+            }
+        }
+        return result;
+    }
     static void PrintColored(string text, ConsoleColor color)
     {
         Console.ForegroundColor = color;
         Console.Write(text);
         Console.ForegroundColor = ConsoleColor.Gray;
-    }
-    static void PrintColoredBG(string text, ConsoleColor color)
-    {
-        Console.BackgroundColor = color;
-        Console.Write(text);
-        Console.BackgroundColor = ConsoleColor.Gray;
-    }
-    static void PrintColoredTextBG(string text, ConsoleColor colorFG, ConsoleColor colorBG)
-    {
-        Console.ForegroundColor = colorFG;
-        Console.BackgroundColor = colorBG;
-        Console.Write(text);
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.BackgroundColor = ConsoleColor.Black;
     }
 }

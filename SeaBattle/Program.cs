@@ -9,188 +9,143 @@ class Program
     {
         Console.InputEncoding = System.Text.Encoding.UTF8;
         Console.OutputEncoding = System.Text.Encoding.UTF8;
-
-        // var field = new Matrix();
-        // Console.WriteLine(field.ToString());
-        //
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     for (int j = 0; j < 10; j++)
-        //     {
-        //         if ((j + i) % 2 == 0)
-        //         {
-        //             Console.BackgroundColor = ConsoleColor.DarkGray;
-        //         }
-        //         else
-        //         {
-        //             Console.BackgroundColor = ConsoleColor.Black;
-        //         }
-        //
-        //         if (i == 5 && j > 3 && j < 7)
-        //         {
-        //             Console.ForegroundColor = ConsoleColor.DarkRed;
-        //             Console.Write(" \u2715 ");
-        //         }
-        //         else
-        //         {
-        //             Console.ForegroundColor = ConsoleColor.White;
-        //             Console.Write("   ");
-        //         }
-        //         
-        //     }
-        //     Console.Write("\n");
-        // }
-        //
-        // Console.ReadKey();
-
-        ConsoleKeyInfo input;
-        int mode = 1;
-        ConsoleColor hostColor = ConsoleColor.Gray;
-        ConsoleColor joinColor = ConsoleColor.Yellow;
+        
+        
+        string[] modeNames = ["1 - Join", "2 - Create and join", "3 - Server only"];
+        int[] modes = [0, 0, 0];
+        int choice = 0;
+        bool confirmed = false;
+        
         while (true)
         {
             Console.Clear();
-            PrintColored("1 - Join", joinColor);
-            PrintColored("2 - Host", hostColor);
-
-            input = Console.ReadKey();
-            if (input.KeyChar == '1' || input.KeyChar == 'w' || input.Key == ConsoleKey.UpArrow)
+            
+            PrintWelcomeText();
+            
+            modes[choice] = 1;
+            int i = 0;
+            
+            foreach (var mode in modes)
             {
-                mode = 1;
-                hostColor = ConsoleColor.Gray;
-                joinColor = ConsoleColor.Yellow;
-            } else if (input.KeyChar == '2' || input.KeyChar == 's' || input.Key == ConsoleKey.DownArrow)
+                ConsoleColor color;
+                if (mode == 1)
+                    color = ConsoleColor.Yellow;
+                else
+                    color = ConsoleColor.Gray;
+                WriteLineColored($"{modeNames[i]}", color);
+                i++;
+            }
+            ConsoleKeyInfo input = Console.ReadKey();
+            modes[choice] = 0;
+            
+            switch (input.Key)
             {
-                mode = 2;
-                hostColor = ConsoleColor.Yellow;
-                joinColor = ConsoleColor.Gray;
-            } else if (input.Key == ConsoleKey.Enter)
+                case ConsoleKey.W:
+                case ConsoleKey.UpArrow:
+                    choice--;
+                    break;
+                case ConsoleKey.S:
+                case ConsoleKey.DownArrow:
+                    choice++;
+                    break;
+                case ConsoleKey.D1:
+                    choice = 0;
+                    break;
+                case ConsoleKey.D2:
+                    choice = 1;
+                    break;
+                case ConsoleKey.D3:
+                    choice = 2;
+                    break;
+                case ConsoleKey.Enter:
+                    confirmed = true;
+                    break;
+            }
+            if (choice > 2)
             {
-                Console.WriteLine(mode);
-                Console.WriteLine("Confirm");
-                Console.WriteLine();
+                choice = 0;
+            }
+            else if (choice < 0)
+            {
+                choice = 2;
+            }
+            
+            if (confirmed)
                 break;
-            }
         }
-
-
-        if (mode == 1)
+        
+        
+        
+        if (choice == 0)
         {
-            // -----------------------------------
-            // Insta Test
-            
-            string ipAddress = "localhost";
-            string port = "5000";
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                port = "5001";
-            }
-            string name = "Client";
-            
-            // -----------------------------------
+// ----------------------------------- Skip for test
 
-            
-            // string ipAddress;
-            // string port;
-            // string name;
-            //
-            // Console.Clear();
-            // Console.WriteLine("Enter the adress for connection - ip:port");
-            // string address = Console.ReadLine();
-            //
-            //
-            // if (address[address.Length - 4] != ':')
-            //     address += ":5000";
-            //
-            // ipAddress = address.Split(":")[0];
-            // port = address.Split(":")[1];
-            //
-            // if (ipAddress == "auto")
+            // string ipAddress = "localhost";
+            // string port = "5000";
+            // if (Environment.OSVersion.Platform == PlatformID.Unix)
             // {
-            //     ipAddress = findIPv4();
+            //     port = "5001";
             // }
-            //
-            // Console.WriteLine("Enter your name");
-            // do
-            // {
-            //     Console.SetCursorPosition(0, 3);
-            //     name = Console.ReadLine();
-            // } while (name.Length < 1);
+            // string name = "Client";
+            
+// ----------------------------------- Connect as client
+
+            string ipAddress;
+            string port;
+            string name;
+            
+            Console.Clear();
+            Console.WriteLine("Enter the adress for connection - ip:port");
+            string address = Console.ReadLine();
+            
+            
+            if (address[address.Length - 4] != ':')
+                address += ":5000";
+            
+            ipAddress = address.Split(":")[0];
+            port = address.Split(":")[1];
+            
+            
+            Console.WriteLine("Enter your name");
+            do
+            {
+                Console.SetCursorPosition(0, 3);
+                name = Console.ReadLine();
+            } while (name.Length < 1);
             Console.WriteLine($"{name} - {ipAddress}:{port}");
             Client client = new Client(ipAddress, port, name);
             client.Connect();
-        }
-        else
-        {  
-            // -----------------------------------
-            // Insta Test
-            
-            string portStr = "5000";
-            int port = 5000;
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                portStr = "5001";
-                port = 5001;
-            }
-            string ipAddress = "localhost";
-            string name = "HOST";
-            
-            // -----------------------------------
-            
-            // string portStr;
-            // int port;
+        } else if (choice == 1)
+        { 
+ // ----------------------------------- Skip for test
+ 
+            // string portStr = "5000";
+            // int port = 5000;
+            // if (Environment.OSVersion.Platform == PlatformID.Unix)
+            // {
+            //     portStr = "5001";
+            //     port = 5001;
+            // }
             // string ipAddress = "localhost";
-            // string name;
-            //
-            //
-            // Console.Clear();
-            // Console.WriteLine("Enter the port (default: Windows: 5000, Mac: 5001)");
-            //
-            // readPort:
-            // Console.SetCursorPosition(0, 1);
-            // Console.WriteLine("       ");
-            // Console.SetCursorPosition(0, 1);
-            // portStr = Console.ReadLine();
-            // if (portStr == "")
-            // {
-            //     if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            //     {
-            //         portStr = "5000";
-            //         //Console.WriteLine("Windows");
-            //     } else if (Environment.OSVersion.Platform == PlatformID.Unix)
-            //     {
-            //         portStr = "5001";
-            //         //Console.WriteLine("Mac");
-            //     }
-            //     else
-            //     {
-            //         PrintColored("Unknown OS, write it yourself", ConsoleColor.Red);
-            //         goto readPort;
-            //     }
-            //     Console.SetCursorPosition(0, 1);
-            //     Console.WriteLine(portStr);
-            // } else if (portStr.Length != 4)
-            // {
-            //     PrintColored("Invalid port.", ConsoleColor.Red);
-            //     goto readPort;
-            // }
-            //
-            // try
-            // {
-            //     port = int.Parse(portStr);
-            // }
-            // catch (FormatException)
-            // {
-            //     PrintColored("Invalid port.", ConsoleColor.Red);
-            //     goto readPort;
-            // }
-            //
-            // Console.WriteLine("Enter your name");
-            // do
-            // {
-            //     Console.SetCursorPosition(0, 3);
-            //     name = Console.ReadLine();
-            // } while (name.Length < 1);
+            // string name = "HOST";
+            
+// ----------------------------------- Create Server and connect as client
+
+            string ipAddress = "localhost";
+            string name;
+            
+            Console.Clear();
+
+            (string PortStr, int Port) serverPort = EnterServerPort();
+            string portStr = serverPort.PortStr;
+            int port = serverPort.Port;
+            
+            Console.WriteLine("Enter your name");
+            do
+            {
+                Console.SetCursorPosition(0, 3);
+                name = Console.ReadLine();
+            } while (name.Length < 1);
             
             Server server = new Server(port);
             Thread serverThread = new Thread(new ThreadStart(server.Start));
@@ -200,61 +155,100 @@ class Program
             
             Client client = new Client(ipAddress, portStr, name);
             client.Connect();
+        } else if (choice == 2)
+        {
+            string ipAddress = "localhost";
+            string name;
             
-            // serverThread.Join();
+            Console.Clear();
+
+            (string PortStr, int Port) serverPort = EnterServerPort();
+            string portStr = serverPort.PortStr;
+            int port = serverPort.Port;
+            
+            Server server = new Server(port);
+            Thread serverThread = new Thread(new ThreadStart(server.Start));
+            serverThread.Start();
+        }
+
+        (string PortStr, int Port) EnterServerPort()
+        {
+            string portStr;
+            int port;
+            
+            Console.WriteLine("Enter the port (default: Windows - 5000, Mac - 5001)");
+
+            readPort:
+            Console.SetCursorPosition(0, 1);
+            Console.WriteLine("       ");
+            Console.SetCursorPosition(0, 1);
+            portStr = Console.ReadLine();
+            if (portStr == "")
+            {
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    portStr = "5000";
+                    //Console.WriteLine("Windows");
+                } else if (Environment.OSVersion.Platform == PlatformID.Unix)
+                {
+                    portStr = "5001";
+                    //Console.WriteLine("Mac");
+                }
+                else
+                {
+                    WriteLineColored("Unknown OS, write it yourself", ConsoleColor.Red);
+                    goto readPort;
+                }
+                Console.SetCursorPosition(0, 1);
+                Console.WriteLine(portStr);
+            } else if (portStr.Length != 4)
+            {
+                WriteLineColored("Invalid port.", ConsoleColor.Red);
+                goto readPort;
+            }
+            
+            try
+            {
+                port = int.Parse(portStr);
+            }
+            catch (FormatException)
+            {
+                WriteLineColored("Invalid port.", ConsoleColor.Red);
+                goto readPort;
+            }
+
+            return (portStr, port);
+        }
+
+
+        static void PrintWelcomeText()
+        {
+            WriteLineColored("Battleship", ConsoleColor.Blue);
+            Console.WriteLine("\nControls" +
+                              "\n  WASD / ↑←↓→ - Move ship/cursor" +
+                              "\n  1,2,3,4 - Choose ship" +
+                              "\n  R - Rotate ship" +
+                              "\n  Enter - Place ship / Shoot / Confirm" +
+                              "\n  Backspace - Delete ship" +
+                              "\n  C - Confirm position of ships" +
+                              "\n");
+            
         }
         
         
-        
-        static void PrintColored(string text, ConsoleColor color)
+        static void WriteLineColored(string text, ConsoleColor color)
         {
             Console.ForegroundColor = color;
             Console.WriteLine(text);
             Console.ForegroundColor = ConsoleColor.Gray;
         }
-       
-
-        // static string findIPv4()
+        // static void WriteColored(string text, ConsoleColor color)
         // {
-        //     string ipv4 = "";
-        //     foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
-        //     {
-        //         var ipArr = ip.ToString().Split('.');
-        //         if (ipArr.Length == 4)
-        //         {
-        //             if (ipArr[0] == "192" || ipArr[0] == "172" || ipArr[0] == "10")
-        //             {
-        //                 ipv4 = ip.ToString();
-        //             }
-        //         }
-        //     }
-        //     return ipv4;
+        //     Console.ForegroundColor = color;
+        //     Console.Write(text);
+        //     Console.ForegroundColor = ConsoleColor.Gray;
         // }
     }
+   
 }
-//localhost:5001
-/*
- 
-0  1  2  3  4
-   ■  ∙  ✕  □
 
-0 - empty
-1 - ship
-2 - missed
-3 - damaged
-4 - killed (also damaged on your field)
-
-Your field                       |   Enemy's field
-- 0  1  2  3  4  5  6  7  8  9   |   - 0  1  2  3  4  5  6  7  8  9
-0                   ∙  ∙  ∙      |   0    ∙        ∙  ∙  ∙  ∙  ∙  ∙
-1       ■        ■  ∙  □  ∙      |   1    ✕ ∙      ∙  □  ∙  ■  ∙  ■
-2       ■        □  ∙  □  ∙      |   2    ✕        ∙  □  ∙  ■  ∙  ✕
-3       ■        □  ∙  ∙  ∙      |   3             ∙  □  ∙  ✕  ∙  ∙
-4       ■                        |   4             ∙  ∙  ∙ 
-5                      ■         |   5               
-6       ∙          ∙             |   6      
-7             ∙  ∙               |   7       ∙ ∙ 
-8             ∙                  |   8       ∙           
-9                                |   9                            
-
-*/
