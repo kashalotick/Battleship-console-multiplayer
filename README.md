@@ -1,5 +1,5 @@
 # Battleship
-![img1.png](Resources%2Fimg1.png)
+![img1.png](SeaBattle%2FResources%2Fimg1.png)
 My First attempt to make client-server application on C#.
 Has local network multiplayer based on TCP Client and TCP Listener.
 Right to make the first move is set by `_turn = new Random().Next(2);`.
