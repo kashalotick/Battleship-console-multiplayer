@@ -1,5 +1,5 @@
 # Battleship
-![img1.png](SeaBattle%2FResources%2Fimg1.png)
+
 My First attempt to make client-server application on C#.
 Has local network multiplayer based on TCP Client and TCP Listener.
 Right to make the first move is set by `_turn = new Random().Next(2);`.
@@ -23,3 +23,5 @@ Right to make the first move is set by `_turn = new Random().Next(2);`.
 - Language settings
 - Chat
 
+## Images
+![img1.png](SeaBattle%2FResources%2Fimg1.png)![img2.png](SeaBattle%2FResources%2Fimg2.png)![img3.png](SeaBattle%2FResources%2Fimg3.png)
