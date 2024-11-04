@@ -11,7 +11,7 @@ namespace SeaBattle;
 
 public class Server
 {
-    private readonly string _version = "1.0.0";
+    private readonly string _version = "1.0.1";
     private readonly TcpListener _server;
     private readonly List<TcpClient> _clientsList = new List<TcpClient>();
     private readonly int _port;

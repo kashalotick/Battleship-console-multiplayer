@@ -7,7 +7,7 @@ namespace SeaBattle;
 
 public class Client
 {
-    private readonly string _version = "1.0.0";
+    private readonly string _version = "1.0.1";
     private readonly TcpClient _client;
     private readonly string _ipAddress;
     private readonly int _port;
