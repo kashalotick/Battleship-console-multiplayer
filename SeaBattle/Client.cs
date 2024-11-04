@@ -650,9 +650,11 @@ public class Client
             {
                 byte[] buffer = new byte[1024];
                 int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                if (bytesRead == 0)
+                if (bytesRead == 0 && !_ready)
                     break;
                 string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                // PrintColored(message, ConsoleColor.Cyan);
+
                 if (message[0] == '!')
                 {
                     if (message.Substring(0, 5) == "!Turn")
