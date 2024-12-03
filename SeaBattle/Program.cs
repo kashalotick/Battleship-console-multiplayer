@@ -74,8 +74,6 @@ class Program
                 break;
         }
         
-        
-        
         if (choice == 0)
         {
 // ----------------------------------- Skip for test
@@ -131,7 +129,7 @@ class Program
             
 // ----------------------------------- Create Server and connect as client
 
-            string ipAddress = "localhost";
+            string ipAddress = "127.0.0.1";
             string name;
             
             Console.Clear();
@@ -151,15 +149,13 @@ class Program
             Thread serverThread = new Thread(new ThreadStart(server.Start));
             serverThread.Start();
             
-            Thread.Sleep(250);
+            // Thread.Sleep(250);
             
             Client client = new Client(ipAddress, portStr, name);
             client.Connect();
         } else if (choice == 2)
         {
-            string ipAddress = "localhost";
-            string name;
-            
+// ----------------------------------- Create Server only
             Console.Clear();
 
             (string PortStr, int Port) serverPort = EnterServerPort();

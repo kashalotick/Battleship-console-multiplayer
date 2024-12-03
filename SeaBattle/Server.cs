@@ -33,7 +33,12 @@ public class Server
         _server = new TcpListener(IPAddress.Any, _port);
         
         ServerWrite(findIPv4() + ":" + port);
-
+        ServerWrite("-----------------------------");
+        foreach (var ip in Dns.GetHostAddresses(Dns.GetHostName()))
+        {
+            ServerWrite(ip.ToString());
+        }
+        ServerWrite("-----------------------------");
     }
 
     public void Start()
