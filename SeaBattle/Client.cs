@@ -7,7 +7,7 @@ namespace SeaBattle;
 
 public class Client
 {
-    private readonly string _version = "1.0.1";
+    private readonly string _version = "1.0.2";
     private readonly TcpClient _client;
     private readonly string _ipAddress;
     private readonly int _port;
@@ -71,46 +71,46 @@ public class Client
         Thread receiveThread = new Thread(ReceiveMessages);
         receiveThread.Start(); 
 // ----------------------------------- Skip for test
-        // if (_name == "HOST")
-        // {
-        //     Field.Mtrx = new int[10, 10]
-        //     {
-        //         { 0, 0, 0, 0, 0, 1, 0, 1, 0, 0 },
-        //         { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
-        //         { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
-        //         { 0, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
-        //         { 0, 1, 0, 1, 1, 1, 0, 0, 0, 1 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //         { 0, 1, 1, 0, 0, 0, 0, 1, 0, 0 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //         { 1, 0, 1, 0, 0, 1, 1, 0, 0, 0 }
-        //     };
-        // }
-        // else
-        // {
-        //     Field.Mtrx = new int[10, 10]
-        //     {
-        //         { 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //         { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //         { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        //         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-        //         { 1, 0, 1, 0, 0, 1, 1, 0, 0, 1 }
-        //     };
-        // }
-        // _shipsCount = 0;
-        // _allowToConfirm = true;
-        // // if (_name != "HOST") 
-        // //     Thread.Sleep(2000);
-        // _ready = true;
+        if (_name == "HOST")
+        {
+            Field.Mtrx = new int[10, 10]
+            {
+                { 0, 0, 0, 0, 0, 1, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 1, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 1, 0, 1, 1, 1, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 0, 1, 1, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 1, 0, 0, 1, 1, 0, 0, 0 }
+            };
+        }
+        else
+        {
+            Field.Mtrx = new int[10, 10]
+            {
+                { 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+                { 1, 0, 1, 0, 0, 1, 1, 0, 0, 1 }
+            };
+        }
+        _shipsCount = 0;
+        _allowToConfirm = true;
+        // if (_name != "HOST") 
+        //     Thread.Sleep(2000);
+        _ready = true;
  // ----------------------------------- Placing
         
-        PlacingShips(data);
+        //PlacingShips(data);
         string jsonMessage = JsonConvert.SerializeObject(Field.Mtrx);
         data = Encoding.UTF8.GetBytes(jsonMessage);
         _stream.Write(data, 0, data.Length);
@@ -219,6 +219,8 @@ public class Client
                 }
                 continue;
             }
+            
+            
             Console.Clear();
 
             while (Console.KeyAvailable)
@@ -274,6 +276,8 @@ public class Client
                             data = Encoding.UTF8.GetBytes($"!Shoot! {PosY} {PosX}");
                             _stream.Write(data, 0, data.Length);
                             Thread.Sleep(50);
+                            _yourTurn = false;
+                            Thread.Sleep(100);
                         }
                         break;
                 }

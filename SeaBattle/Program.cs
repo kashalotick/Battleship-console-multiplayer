@@ -16,100 +16,103 @@ class Program
         int choice = 0;
         bool confirmed = false;
         
-        while (true)
-        {
-            Console.Clear();
-            
-            PrintWelcomeText();
-            
-            modes[choice] = 1;
-            int i = 0;
-            
-            foreach (var mode in modes)
-            {
-                ConsoleColor color;
-                if (mode == 1)
-                    color = ConsoleColor.Yellow;
-                else
-                    color = ConsoleColor.Gray;
-                WriteLineColored($"{modeNames[i]}", color);
-                i++;
-            }
-            ConsoleKeyInfo input = Console.ReadKey();
-            modes[choice] = 0;
-            
-            switch (input.Key)
-            {
-                case ConsoleKey.W:
-                case ConsoleKey.UpArrow:
-                    choice--;
-                    break;
-                case ConsoleKey.S:
-                case ConsoleKey.DownArrow:
-                    choice++;
-                    break;
-                case ConsoleKey.D1:
-                    choice = 0;
-                    break;
-                case ConsoleKey.D2:
-                    choice = 1;
-                    break;
-                case ConsoleKey.D3:
-                    choice = 2;
-                    break;
-                case ConsoleKey.Enter:
-                    confirmed = true;
-                    break;
-            }
-            if (choice > 2)
-            {
-                choice = 0;
-            }
-            else if (choice < 0)
-            {
-                choice = 2;
-            }
-            
-            if (confirmed)
-                break;
-        }
         
+        choice = 0;
+        
+        // while (true)
+        // {
+        //     Console.Clear();
+        //     
+        //     PrintWelcomeText();
+        //     
+        //     modes[choice] = 1;
+        //     int i = 0;
+        //     
+        //     foreach (var mode in modes)
+        //     {
+        //         ConsoleColor color;
+        //         if (mode == 1)
+        //             color = ConsoleColor.Yellow;
+        //         else
+        //             color = ConsoleColor.Gray;
+        //         WriteLineColored($"{modeNames[i]}", color);
+        //         i++;
+        //     }
+        //     ConsoleKeyInfo input = Console.ReadKey();
+        //     modes[choice] = 0;
+        //     
+        //     switch (input.Key)
+        //     {
+        //         case ConsoleKey.W:
+        //         case ConsoleKey.UpArrow:
+        //             choice--;
+        //             break;
+        //         case ConsoleKey.S:
+        //         case ConsoleKey.DownArrow:
+        //             choice++;
+        //             break;
+        //         case ConsoleKey.D1:
+        //             choice = 0;
+        //             break;
+        //         case ConsoleKey.D2:
+        //             choice = 1;
+        //             break;
+        //         case ConsoleKey.D3:
+        //             choice = 2;
+        //             break;
+        //         case ConsoleKey.Enter:
+        //             confirmed = true;
+        //             break;
+        //     }
+        //     if (choice > 2)
+        //     {
+        //         choice = 0;
+        //     }
+        //     else if (choice < 0)
+        //     {
+        //         choice = 2;
+        //     }
+        //     
+        //     if (confirmed)
+        //         break;
+        // }
+        //
         if (choice == 0)
         {
 // ----------------------------------- Skip for test
 
-            // string ipAddress = "localhost";
-            // string port = "5000";
-            // if (Environment.OSVersion.Platform == PlatformID.Unix)
-            // {
-            //     port = "5001";
-            // }
-            // string name = "Client";
+            string ipAddress = "192.168.0.104";
+            string port = "5000";
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                port = "5001";
+            }
+            string name = "Client";
             
 // ----------------------------------- Connect as client
-
-            string ipAddress;
-            string port;
-            string name;
-            
-            Console.Clear();
-            Console.WriteLine("Enter the adress for connection - ip:port");
-            string address = Console.ReadLine();
-            
-            
-            if (address[address.Length - 4] != ':')
-                address += ":5000";
-            
-            ipAddress = address.Split(":")[0];
-            port = address.Split(":")[1];
-            
-            
-            Console.WriteLine("Enter your name");
-            do
-            {
-                Console.SetCursorPosition(0, 3);
-                name = Console.ReadLine();
-            } while (name.Length < 1);
+            //
+            // string ipAddress;
+            // string port;
+            // string name;
+            //
+            // Console.Clear();
+            // Console.WriteLine("Enter the adress for connection - ip:port");
+            // string address = Console.ReadLine();
+            //
+            //
+            // if (address[address.Length - 4] != ':')
+            //     address += ":5000";
+            //
+            // ipAddress = address.Split(":")[0];
+            // port = address.Split(":")[1];
+            //
+            //
+            // Console.WriteLine("Enter your name");
+            // do
+            // {
+            //     Console.SetCursorPosition(0, 3);
+            //     name = Console.ReadLine();
+            // } while (name.Length < 1);
             Console.WriteLine($"{name} - {ipAddress}:{port}");
             Client client = new Client(ipAddress, port, name);
             client.Connect();
